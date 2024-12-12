@@ -4,7 +4,7 @@ import LessonExceptions.exceptions.MyArrayDataException;
 import LessonExceptions.exceptions.MyArraySizeException;
 
 public class Array {
-    public static void addArray(String[][] array) throws MyArraySizeException, MyArrayDataException {
+    public static int addArray(String[][] array) throws MyArraySizeException, MyArrayDataException {
         if (array.length != 4 || array[0].length != 4) {
             throw new MyArraySizeException("Переданы неверные аргументы. Массив должен быть 4x4");
         }
@@ -14,12 +14,13 @@ public class Array {
                     try {
                         sum += Integer.parseInt(array[i][j]);
                     } catch (NumberFormatException e) {
-                        System.err.println(new MyArrayDataException("Ошибка преобразования в int в строке " + (i + 1) + ", колонке " + (j + 1) + ". Исходное значение: " + array[i][j]).getMessage());
+                        String a = "Ошибка преобразования в int в строке " + (i + 1) + ", колонке " + (j + 1) + ". Исходное значение: " + array[i][j];
+                        System.err.println(new MyArrayDataException(a).getMessage());
                     }
 
             }
         }
-        System.out.println("Сумма значений всех преобразованных ячеек: " + sum);
+        return sum;
 
     }
 }
