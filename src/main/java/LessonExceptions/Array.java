@@ -10,15 +10,15 @@ public class Array {
         }
         int sum = 0;
         for (int i = 0; i < array.length; i++) {
-            for (int j = 0; j < array[i].length; j++) {
+                for (int j = 0; j < array[i].length; j++) {
                     try {
                         sum += Integer.parseInt(array[i][j]);
-                    } catch (NumberFormatException e) {
-                        String a = "Ошибка преобразования в int в строке " + (i + 1) + ", колонке " + (j + 1) + ". Исходное значение: " + array[i][j];
-                        System.err.println(new MyArrayDataException(a).getMessage());
                     }
+                    catch (NumberFormatException e) {
+                        throw new MyArrayDataException("Ошибка преобразования в int в строке " + (i + 1) + ", колонке " + (j + 1) + ". Исходное значение: " + array[i][j]);
+                    }
+                }
 
-            }
         }
         return sum;
 
