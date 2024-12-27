@@ -1,15 +1,15 @@
 package Lesson15;
 
 import Lesson17.MainPage;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -17,20 +17,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class NewMtsTest {
     static MainPage mainPage = new MainPage(new ChromeDriver());
 
-    /**
-     * Выполняем данный метод первым до начала всех тестов
-     */
     @BeforeAll
     public static void setup() {
         mainPage.goToMainPage();
-        if (mainPage.acceptCookies().isDisplayed()) {
-            mainPage.acceptCookies().click();
-        }
+        mainPage.acceptCookies();
     }
 
-    /**
-     * Выполняем данный метод последним, не зависимо от результатов тестов
-     */
     @AfterAll
     public static void teardown() {
         if (mainPage.getCurrentDriver() != null) {
@@ -38,9 +30,6 @@ public class NewMtsTest {
         }
     }
 
-    /**
-     * Ищем блок "Онлайн пополнение без комиссии" и проверяем его заголовок
-     */
     @DisplayName("Проверка названия блока")
     @ParameterizedTest
     @ValueSource(strings = {"Онлайн пополнение\nбез комиссии"})
@@ -48,14 +37,11 @@ public class NewMtsTest {
         assertEquals(expectedTitle, mainPage.getPaymentBlockTitle().getText());
     }
 
-    /**
-     * Проверяем, отображаются ли логотипы платежных систем
-     */
     @DisplayName("Проверка отображения логотипов платежных систем")
     @ParameterizedTest
     @ValueSource(strings = {"Visa", "Verified By Visa", "MasterCard", "MasterCard Secure Code", "Белкарт"})
     public void checkPaymentLogos(String cardName) {
-        assertTrue(mainPage.paymentLogo(cardName).isDisplayed());
+        assertTrue(mainPage.paymentLogo(cardName));
     }
 
     @DisplayName("Проверка ссылки \"Подробнее о сервисе\"")
@@ -65,8 +51,8 @@ public class NewMtsTest {
         mainPage.moreAboutServiceLink().click();
         mainPage.waitTitle(nextPageTitle);
         assertEquals(nextPageLink, mainPage.getCurrentUrl());
-        mainPage.goToMainPage();
     }
+
     @DisplayName("Проверка корректного заполнения поля суммы и кнопки \"Продолжить\"")
     @ParameterizedTest
     @CsvSource({"0.1, 0.10",
@@ -75,25 +61,34 @@ public class NewMtsTest {
             "499.99, 499.99",
             "-10, 10.00"})
     public void checkFillingSum(String sum, String displayedSum) {
+//        mainPage.switchToMenuItem("Услуги связи");
+        mainPage.checkDefaultMenuItem();
+        mainPage.clearFields();
         mainPage.submitPaymentForm("297777777", sum, "qwwwww@dfgfg.ru");
         mainPage.goToFrame();
         assertEquals(mainPage.displayedSumExpected(displayedSum), mainPage.displayedSumActual());
         assertEquals(mainPage.sumInButtonExpected(displayedSum), mainPage.sumInButtonActual());
-        assertEquals(mainPage.phoneExpected(displayedSum), mainPage.phoneActual());
+        assertEquals(mainPage.phoneExpected("297777777"), mainPage.phoneActual());
         mainPage.closeFrame();
         mainPage.clearFields();
     }
+
     @DisplayName("Проверка заполнения поля суммы нулём")
     @ParameterizedTest
     @ValueSource(strings = {"0"})
     public void checkFillingNullSum(String sum) {
+        mainPage.checkDefaultMenuItem();
+
+        mainPage.clearFields();
         mainPage.submitPaymentForm("297777777", sum, "qwwwww@dfgfg.ru");
         assertTrue(mainPage.isNoSumAllertDisplayed());
         mainPage.clearFields();
     }
-    @DisplayName("Проверка заполнения поля суммы нулём")
+
+    @DisplayName("Проверка оставления поля суммы пустым")
     @Test
     public void checkFillingEmptySum() {
+        mainPage.checkDefaultMenuItem();
         assertEquals("true", mainPage.isAttributeRequired());
     }
 
@@ -101,6 +96,7 @@ public class NewMtsTest {
     @ParameterizedTest
     @ValueSource(strings = {"000"})
     public void checkFillingIncorrectEmail(String email) {
+        mainPage.checkDefaultMenuItem();
         mainPage.submitPaymentForm("297777777", "50", email);
         assertTrue(mainPage.isNoEmailAllertDisplayed());
         mainPage.clearFields();
@@ -109,16 +105,18 @@ public class NewMtsTest {
     @DisplayName("Проверка оставления поля email пустым")
     @Test
     public void checkFillingEmptyEmail() {
+        mainPage.checkDefaultMenuItem();
         mainPage.submitPaymentForm("297777777", "50", "qwwwww@dfgfg.ru");
         mainPage.goToFrame();
         mainPage.closeFrame();
         mainPage.clearFields();
     }
 
-    @DisplayName("Проверка отображения номера телефона и названий полей в фрейме")
+    @DisplayName("Проверка отображения номера телефона, названий полей в фрейме и лого платежных систем")
     @ParameterizedTest
     @CsvSource({"297777777, 50, qwwwww@dfgfg.ru, Номер карты, Срок действия, CVC, Имя держателя (как на карте)"})
     public void checkFramePhoneAndFields(String phone, String sum, String email, String card, String validityPeriod, String cvc, String holder) {
+        mainPage.checkDefaultMenuItem();
         mainPage.submitPaymentForm(phone, sum, email);
         mainPage.goToFrame();
         assertEquals(mainPage.phoneExpected(phone), mainPage.phoneActual());
@@ -132,6 +130,21 @@ public class NewMtsTest {
         }
         mainPage.closeFrame();
         mainPage.clearFields();
+    }
+
+    @DisplayName("Проверка названий полей в вариантах оплаты услуг")
+    @ParameterizedTest
+    @CsvSource({"Услуги связи, Номер телефона, Сумма, E-mail для отправки чека",
+            "Домашний интернет, Номер абонента, Сумма, E-mail для отправки чека",
+            "Рассрочка, Номер счета на 44, Сумма, E-mail для отправки чека",
+            "Задолженность, Номер счета на 2073, Сумма, E-mail для отправки чека"})
+    public void checkFieldsInEachService(String service, String field1, String field2, String field3)  {
+        mainPage.checkDefaultMenuItem();
+        List<String> expectedPlaceholder = Arrays.asList(field1, field2, field3);
+        mainPage.switchToMenuItem(service);
+        for (int i = 0; i < expectedPlaceholder.size(); i++) {
+            assertEquals(expectedPlaceholder.get(i), mainPage.placeholders(service).get(i));
+        }
     }
 
 
