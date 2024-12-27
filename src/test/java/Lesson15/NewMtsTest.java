@@ -5,7 +5,9 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,7 +22,9 @@ public class NewMtsTest {
     @BeforeAll
     public static void setup() {
         mainPage.goToMainPage();
-        mainPage.acceptCookies();
+        if (mainPage.acceptCookies().isDisplayed()) {
+            mainPage.acceptCookies().click();
+        }
     }
 
     /**
@@ -52,6 +56,51 @@ public class NewMtsTest {
     public void checkPaymentLogos(String cardName) {
         assertTrue(mainPage.paymentLogo(cardName).isDisplayed());
     }
+
+    @DisplayName("Проверка ссылки \"Подробнее о сервисе\"")
+    @ParameterizedTest
+    @CsvSource({"https://www.mts.by/help/poryadok-oplaty-i-bezopasnost-internet-platezhey/, Порядок оплаты и безопасность интернет платежей"})
+    public void checkMoreAboutServiceLink(String nextPageLink, String nextPageTitle) {
+        mainPage.moreAboutServiceLink().click();
+        mainPage.waitTitle(nextPageTitle);
+        assertEquals(nextPageLink, mainPage.getCurrentUrl());
+        mainPage.goToMainPage();
+    }
+    @DisplayName("Проверка корректного заполнения поля суммы и кнопки \"Продолжить\"")
+    @ParameterizedTest
+    @CsvSource({"0.1, 0.10",
+            "1, 1.00",
+            "499, 499.00",
+            "499.99, 499.99",
+            "-10, 10.00"})
+    public void checkFillingSum(String sum, String displayedSum) {
+        mainPage.submitPaymentForm("297777777", sum, "qwwwww@dfgfg.ru");
+        mainPage.goToFrame();
+        assertEquals(mainPage.displayedSumExpected(displayedSum), mainPage.displayedSumActual());
+        assertEquals(mainPage.sumInButtonExpected(displayedSum), mainPage.sumInButtonActual());
+        assertEquals(mainPage.phoneExpected(displayedSum), mainPage.phoneActual());
+        mainPage.closeFrame();
+        mainPage.clearFields();
+    }
+    @DisplayName("Проверка отображения номера телефона и названий полей в фрейме")
+    @ParameterizedTest
+    @CsvSource({"297777777, 50, qwwwww@dfgfg.ru, Номер карты, Срок действия, CVC, Имя держателя (как на карте)"})
+    public void checkFramePhoneAndFields(String phone, String sum, String email, String card, String validityPeriod, String cvc, String holder) {
+        mainPage.submitPaymentForm(phone, sum, email);
+        mainPage.goToFrame();
+        assertEquals(mainPage.phoneExpected(phone), mainPage.phoneActual());
+        assertEquals(card, mainPage.card());
+        assertEquals(validityPeriod, mainPage.validityPeriod());
+        assertEquals(cvc, mainPage.cvc());
+        assertEquals(holder, mainPage.holder());
+        for (WebElement cards : mainPage.cardLogos()) {
+            mainPage.waitForElementVisibility(cards);
+            assertTrue(cards.isDisplayed());
+        }
+        mainPage.closeFrame();
+        mainPage.clearFields();
+    }
+
 
 
 }
