@@ -5,11 +5,11 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 public class MainPage {
-    private WebDriver driver;
+    private final WebDriver driver;
 
     private final String mainUrl = "https://www.mts.by/";
     private final By acceptCookieButton = By.xpath("//h3[contains(text(), 'Обработка файлов cookie')]/../../..//button[text() = 'Принять']");
-    public final WebElement paymentBlockTitle = driver.findElement(By.xpath("//div[@class='pay__wrapper']/h2"));
+    private final By paymentBlockTitle = By.xpath("//div[@class='pay__wrapper']/h2");
 
 
     public MainPage(WebDriver driver) {
@@ -17,6 +17,7 @@ public class MainPage {
         driver.manage().window().maximize();
 
     }
+
     public WebElement paymentLogo(String cardName) {
         return driver.findElement(By.xpath("//h2[contains(text(), 'Онлайн пополнение')]/..//img[@alt='" + cardName + "']"));
     }
@@ -33,6 +34,9 @@ public class MainPage {
     }
     public WebDriver getCurrentDriver() {
         return driver;
+    }
+    public WebElement getPaymentBlockTitle() {
+        return driver.findElement(paymentBlockTitle);
     }
 
 

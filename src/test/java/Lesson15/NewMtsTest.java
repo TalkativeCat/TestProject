@@ -12,16 +12,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class NewMtsTest {
-    static MainPage mainPage;
+    static MainPage mainPage = new MainPage(new ChromeDriver());
+
     /**
      * Выполняем данный метод первым до начала всех тестов
      */
     @BeforeAll
     public static void setup() {
-        mainPage = new MainPage(new ChromeDriver());
         mainPage.goToMainPage();
         mainPage.acceptCookies();
     }
+
     /**
      * Выполняем данный метод последним, не зависимо от результатов тестов
      */
@@ -31,6 +32,7 @@ public class NewMtsTest {
             mainPage.getCurrentDriver().quit();
         }
     }
+
     /**
      * Ищем блок "Онлайн пополнение без комиссии" и проверяем его заголовок
      */
@@ -38,8 +40,9 @@ public class NewMtsTest {
     @ParameterizedTest
     @ValueSource(strings = {"Онлайн пополнение\nбез комиссии"})
     public void checkBlockHeader(String expectedTitle) {
-        assertEquals(expectedTitle, mainPage.paymentBlockTitle.getText());
+        assertEquals(expectedTitle, mainPage.getPaymentBlockTitle().getText());
     }
+
     /**
      * Проверяем, отображаются ли логотипы платежных систем
      */
