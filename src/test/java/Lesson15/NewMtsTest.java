@@ -4,6 +4,7 @@ import Lesson17.MainPage;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -82,6 +83,38 @@ public class NewMtsTest {
         mainPage.closeFrame();
         mainPage.clearFields();
     }
+    @DisplayName("Проверка заполнения поля суммы нулём")
+    @ParameterizedTest
+    @ValueSource(strings = {"0"})
+    public void checkFillingNullSum(String sum) {
+        mainPage.submitPaymentForm("297777777", sum, "qwwwww@dfgfg.ru");
+        assertTrue(mainPage.isNoSumAllertDisplayed());
+        mainPage.clearFields();
+    }
+    @DisplayName("Проверка заполнения поля суммы нулём")
+    @Test
+    public void checkFillingEmptySum() {
+        assertEquals("true", mainPage.isAttributeRequired());
+    }
+
+    @DisplayName("Проверка некорректного заполнения email")
+    @ParameterizedTest
+    @ValueSource(strings = {"000"})
+    public void checkFillingIncorrectEmail(String email) {
+        mainPage.submitPaymentForm("297777777", "50", email);
+        assertTrue(mainPage.isNoEmailAllertDisplayed());
+        mainPage.clearFields();
+    }
+
+    @DisplayName("Проверка оставления поля email пустым")
+    @Test
+    public void checkFillingEmptyEmail() {
+        mainPage.submitPaymentForm("297777777", "50", "qwwwww@dfgfg.ru");
+        mainPage.goToFrame();
+        mainPage.closeFrame();
+        mainPage.clearFields();
+    }
+
     @DisplayName("Проверка отображения номера телефона и названий полей в фрейме")
     @ParameterizedTest
     @CsvSource({"297777777, 50, qwwwww@dfgfg.ru, Номер карты, Срок действия, CVC, Имя держателя (как на карте)"})

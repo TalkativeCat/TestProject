@@ -35,6 +35,8 @@ public class MainPage {
     private final By belkart = By.xpath("//img[contains(@src, 'belkart-system')]");
     private final By maestro = By.xpath("//img[contains(@src, 'maestro-system')]");
     private final By mir = By.xpath("//img[contains(@src, 'mir-system-ru')]");
+    private final By noSumAllert = By.xpath("//p[text() = 'Введите сумму платежа']");
+    private final By noEmailAllert = By.xpath("//p[text() = 'Введите корректный адрес электронной почты.']");
 
     public MainPage(WebDriver driver) {
         this.driver = driver;
@@ -133,6 +135,15 @@ public class MainPage {
     private void waitVisibilityOfElementLocated(By locator) {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5), Duration.ofMillis(1000));
         wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+    }
+    public boolean isNoSumAllertDisplayed() {
+        return driver.findElement(noSumAllert).isDisplayed();
+    }
+    public boolean isNoEmailAllertDisplayed() {
+        return driver.findElement(noEmailAllert).isDisplayed();
+    }
+    public String isAttributeRequired() {
+        return driver.findElement(sumInput).getDomAttribute("required");
     }
     public void waitForElementVisibility(WebElement element) {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5), Duration.ofMillis(1000));
