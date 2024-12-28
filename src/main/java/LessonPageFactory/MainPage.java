@@ -1,4 +1,4 @@
-package Lesson17;
+package LessonPageFactory;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;

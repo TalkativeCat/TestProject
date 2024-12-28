@@ -1,6 +1,6 @@
-package Lesson15;
+package LessonPageFactory;
 
-import Lesson17.MainPage;
+import LessonPageFactory.MainPage;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
